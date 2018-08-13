@@ -19,8 +19,9 @@ type ListInvitesResponse struct {
 	}
 }
 
+var data ListInvitesResponse
+
 func (c *Client) ListInvites(teamID int) (*ListInvitesResponse, error) {
-	var data ListInvitesResponse
 
 	// Invitation call has pagination.
 	// There's a feature request to expire the invitations after some time.
