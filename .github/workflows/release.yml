@@ -1,0 +1,72 @@
+# Create a new GitHub release on pushed tag stating with 'v'.
+
+name: Release
+
+on:
+  push:
+    tags:
+    - 'v*'
+
+jobs:
+
+  test:
+    name: Release Test
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+
+    - name: check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: get dependencies
+      run: |
+        go get -v -t -d ./...
+        if [ -f Gopkg.toml ]; then
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
+        fi
+
+    - name: install tools
+      run: make tools
+
+    - name: sanity-check
+      run: |
+        make lint
+        make vet
+        make test
+
+  build:
+    name: Release
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+
+    - name: check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: get dependencies
+      run: |
+        go get -v -t -d ./...
+        if [ -f Gopkg.toml ]; then
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
+        fi
+
+    - name: create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
