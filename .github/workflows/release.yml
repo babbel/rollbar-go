@@ -1,8 +1,10 @@
-# Create a new GitHub release on pushed tag stating with 'v'.
+# Test and if on version tag create a new GitHub release.
 
-name: Release
+name: Test Release
 
 on:
+  pull_request:
+    branches: [ master ]
   push:
     tags:
     - 'v*'
@@ -42,6 +44,7 @@ jobs:
   build:
     name: Release
     needs: test
+    if: startsWith( github.event.ref, 'refs/tags/v' )
     runs-on: ubuntu-latest
     steps:
 
